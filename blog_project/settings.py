@@ -149,3 +149,12 @@ LOGIN_URL = 'login'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Development only
+EMAIL_HOST = 'smtp.gmail.com'  # For production
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com'  # Replace with your email for production
+EMAIL_HOST_PASSWORD = 'your-app-password'  # Replace with your app password for production
+DEFAULT_FROM_EMAIL = 'Django Blog <noreply@djangoblog.com>'

@@ -1,0 +1,37 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% block title %}{{ profile_user.username }}'s Profile - Django Blog{% endblock %}
+{% block content %}
+    <div class="content-section">
+        <div class="media d-flex mb-4">
+            <img class="rounded-circle account-img me-3" src="{{ profile_user.profile.image.url }}" style="width: 150px; height: 150px; object-fit: cover;">
+            <div class="media-body">
+                <h2 class="account-heading">{{ profile_user.username }}</h2>
+                {% if profile_user.profile.bio %}
+                    <p>{{ profile_user.profile.bio }}</p>
+                {% endif %}
+                {% if profile_user.profile.location %}
+                    <p><strong>Location:</strong> {{ profile_user.profile.location }}</p>
+                {% endif %}
+                {% if profile_user.profile.website %}
+                    <p><strong>Website:</strong> <a href="{{ profile_user.profile.website }}" target="_blank">{{ profile_user.profile.website }}</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <h2 class="mb-3">Posts by {{ profile_user.username }}</h2>
+    {% for post in posts %}
+        <article class="content-section">
+            <div class="article-metadata">
+                <a href="{% url 'user-profile' post.author.username %}">{{ post.author }}</a>
+                <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
+            </div>
+            <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+            <p class="article-content">{{ post.content|truncatewords:50 }}</p>
+            <a href="{% url 'post-detail' post.id %}" class="btn btn-primary btn-sm">Read More</a>
+        </article>
+    {% empty %}
+        <div class="alert alert-info">No posts available.</div>
+    {% endfor %}
+{% endblock content %} 

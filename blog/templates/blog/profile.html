@@ -1,0 +1,64 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% block title %}Profile - Django Blog{% endblock %}
+{% block content %}
+    <div class="content-section">
+        <div class="media d-flex mb-4">
+            <img class="rounded-circle account-img me-3" src="{{ user.profile.image.url }}" style="width: 150px; height: 150px; object-fit: cover;">
+            <div class="media-body">
+                <h2 class="account-heading">{{ user.username }}</h2>
+                <p class="text-secondary">{{ user.email }}</p>
+                {% if user.profile.bio %}
+                    <p>{{ user.profile.bio }}</p>
+                {% endif %}
+                {% if user.profile.location %}
+                    <p><strong>Location:</strong> {{ user.profile.location }}</p>
+                {% endif %}
+                {% if user.profile.website %}
+                    <p><strong>Website:</strong> <a href="{{ user.profile.website }}" target="_blank">{{ user.profile.website }}</a></p>
+                {% endif %}
+            </div>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Profile Info</legend>
+                <div class="form-group mb-3">
+                    <label for="{{ u_form.username.id_for_label }}">Username</label>
+                    {{ u_form.username.errors }}
+                    <input type="text" name="{{ u_form.username.name }}" id="{{ u_form.username.id_for_label }}" class="form-control {% if u_form.username.errors %}is-invalid{% endif %}" value="{{ u_form.username.value|default:'' }}">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="{{ u_form.email.id_for_label }}">Email</label>
+                    {{ u_form.email.errors }}
+                    <input type="email" name="{{ u_form.email.name }}" id="{{ u_form.email.id_for_label }}" class="form-control {% if u_form.email.errors %}is-invalid{% endif %}" value="{{ u_form.email.value|default:'' }}">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="{{ p_form.image.id_for_label }}">Profile Picture</label>
+                    {{ p_form.image.errors }}
+                    <div class="custom-file">
+                        <input type="file" name="{{ p_form.image.name }}" id="{{ p_form.image.id_for_label }}" class="form-control {% if p_form.image.errors %}is-invalid{% endif %}">
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="{{ p_form.bio.id_for_label }}">Bio</label>
+                    {{ p_form.bio.errors }}
+                    <textarea name="{{ p_form.bio.name }}" id="{{ p_form.bio.id_for_label }}" class="form-control {% if p_form.bio.errors %}is-invalid{% endif %}" rows="3">{{ p_form.bio.value|default:'' }}</textarea>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="{{ p_form.location.id_for_label }}">Location</label>
+                    {{ p_form.location.errors }}
+                    <input type="text" name="{{ p_form.location.name }}" id="{{ p_form.location.id_for_label }}" class="form-control {% if p_form.location.errors %}is-invalid{% endif %}" value="{{ p_form.location.value|default:'' }}">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="{{ p_form.website.id_for_label }}">Website</label>
+                    {{ p_form.website.errors }}
+                    <input type="url" name="{{ p_form.website.name }}" id="{{ p_form.website.id_for_label }}" class="form-control {% if p_form.website.errors %}is-invalid{% endif %}" value="{{ p_form.website.value|default:'' }}">
+                </div>
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-primary" type="submit">Update</button>
+            </div>
+        </form>
+    </div>
+{% endblock content %} 

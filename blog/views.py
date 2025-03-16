@@ -8,11 +8,13 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from .models import Post, Comment
+from .models import Post, Comment, Profile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, CustomPasswordResetForm
+from django.contrib.auth.views import PasswordResetView
 
 class PostListView(ListView):
     model = Post
@@ -105,14 +107,18 @@ def delete_comment(request, pk):
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}! You can now log in.')
             return redirect('login')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.capitalize()}: {error}")
     else:
-        form = UserCreationForm()
+        form = UserRegisterForm()
     return render(request, 'blog/register.html', {'form': form})
 
 def user_login(request):
@@ -131,3 +137,63 @@ def user_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully!')
     return redirect('blog-home')
+
+@login_required
+def profile(request):
+    # Ensure the user has a profile
+    try:
+        profile = request.user.profile
+    except:
+        # Create a profile if it doesn't exist
+        profile = Profile.objects.create(user=request.user)
+        messages.info(request, 'A profile has been created for you.')
+    
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, 
+                                   request.FILES, 
+                                   instance=profile)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, 'Your profile has been updated!')
+            return redirect('profile')
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=profile)
+    
+    context = {
+        'u_form': u_form,
+        'p_form': p_form
+    }
+    
+    return render(request, 'blog/profile.html', context)
+
+def user_profile(request, username):
+    user = get_object_or_404(User, username=username)
+    posts = Post.objects.filter(author=user).order_by('-date_posted')
+    
+    # Ensure the user has a profile
+    try:
+        profile = user.profile
+    except:
+        # Create a profile if it doesn't exist
+        profile = Profile.objects.create(user=user)
+    
+    context = {
+        'profile_user': user,
+        'posts': posts
+    }
+    
+    return render(request, 'blog/user_profile.html', context)
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'blog/password_reset.html'
+    email_template_name = 'blog/password_reset_email.html'
+    success_url = '/password-reset/done/'
+    form_class = CustomPasswordResetForm
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['subject'] = 'Django Blog - Password Reset'
+        return kwargs

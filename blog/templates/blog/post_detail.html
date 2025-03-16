@@ -3,7 +3,7 @@
 {% block content %}
     <article class="content-section">
         <div class="article-metadata">
-            <a href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
+            <a href="{% url 'user-profile' object.author.username %}">{{ object.author }}</a>
             <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
             <div class="mt-2">
                 {% if object.author == user %}
@@ -39,7 +39,7 @@
             <div class="comment">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <strong>{{ comment.author }}</strong>
+                        <strong><a href="{% url 'user-profile' comment.author.username %}">{{ comment.author }}</a></strong>
                         <small class="text-muted">{{ comment.date_posted|date:"F d, Y" }}</small>
                     </div>
                     {% if comment.author == user or user.is_superuser %}
