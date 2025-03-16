@@ -1,0 +1,57 @@
+{% extends "blog/base.html" %}
+{% block title %}{{ object.title }} - Django Blog{% endblock %}
+{% block content %}
+    <article class="content-section">
+        <div class="article-metadata">
+            <a href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
+            <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
+            <div class="mt-2">
+                {% if object.author == user %}
+                    <a class="btn btn-secondary btn-sm" href="{% url 'post-update' object.id %}">Update</a>
+                    <a class="btn btn-danger btn-sm" href="{% url 'post-delete' object.id %}">Delete</a>
+                {% elif user.is_superuser %}
+                    <a class="btn btn-secondary btn-sm" href="{% url 'post-update' object.id %}">Update as Admin</a>
+                    <a class="btn btn-danger btn-sm" href="{% url 'post-delete' object.id %}">Delete as Admin</a>
+                {% endif %}
+            </div>
+        </div>
+        <h1 class="article-title">{{ object.title }}</h1>
+        <p class="article-content">{{ object.content }}</p>
+    </article>
+
+    <!-- Comment Section -->
+    <div class="comment-section">
+        <h3>Comments ({{ object.comments.count }})</h3>
+        
+        {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'add-comment' object.id %}" class="mb-4">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea name="content" class="form-control" rows="3" placeholder="Add a comment..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Submit</button>
+            </form>
+        {% else %}
+            <div class="alert alert-info">Please <a href="{% url 'login' %}">login</a> to add a comment.</div>
+        {% endif %}
+        
+        {% for comment in object.comments.all %}
+            <div class="comment">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>{{ comment.author }}</strong>
+                        <small class="text-muted">{{ comment.date_posted|date:"F d, Y" }}</small>
+                    </div>
+                    {% if comment.author == user or user.is_superuser %}
+                        <a href="{% url 'delete-comment' comment.id %}" class="btn btn-danger btn-sm">
+                            {% if user.is_superuser and comment.author != user %}Delete as Admin{% else %}Delete{% endif %}
+                        </a>
+                    {% endif %}
+                </div>
+                <p class="mt-2">{{ comment.content }}</p>
+            </div>
+        {% empty %}
+            <div class="alert alert-secondary">No comments yet.</div>
+        {% endfor %}
+    </div>
+{% endblock content %} 
